@@ -3,179 +3,251 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Phiếu Đánh Giá Cảm Xúc Sau 5 Ngày</title>
+    <title>Theo Dõi Cảm Xúc 5 Ngày</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        /* CSS Styling */
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f7f6;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
         }
-        .container {
-            background-color: #ffffff;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            max-width: 700px;
-            width: 100%;
+        .mood-score-10 { background-color: #10b981; }
+        .mood-score-8 { background-color: #3b82f6; }
+        .mood-score-6 { background-color: #f97316; }
+        .mood-score-4 { background-color: #f43f5e; }
+        .mood-score-2 { background-color: #94a3b8; }
+        .quiz-option input[type="radio"] { display: none; }
+        .quiz-option label {
+            display: block; padding: 8px 12px; border: 2px solid #e5e7eb;
+            border-radius: 8px; cursor: pointer; background: #f8fafc; transition: .2s;
         }
-        h2 {
-            color: #2c3e50;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-        }
-        .question-block {
-            margin-bottom: 25px;
-            padding: 15px;
-            border: 1px solid #ecf0f1;
-            border-radius: 8px;
-        }
-        .question-block label {
-            font-weight: bold;
-            display: block;
-            margin-bottom: 10px;
-            color: #2980b9;
-        }
-        .scale-option {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 5px;
-            font-size: 0.9em;
-            color: #7f8c8d;
-        }
-        input[type="range"] {
-            width: 100%;
-            margin-top: 10px;
-        }
-        textarea {
-            width: 97%;
-            min-height: 80px;
-            padding: 10px;
-            border: 1px solid #bdc3c7;
-            border-radius: 4px;
-            resize: vertical;
-        }
-        button {
-            background-color: #2ecc71;
-            color: white;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 1.1em;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #27ae60;
+        .quiz-option input[type="radio"]:checked + label {
+            background-color: #e0e7ff; border-color: #4f46e5; color: #4f46e5; font-weight: 600;
         }
     </style>
 </head>
-<body>
 
-<div class="container">
-    <h2>📝 Phiếu Đánh Giá Cảm Xúc Sau 5 Ngày</h2>
-    <p>Mục đích là để lắng nghe cảm nhận của sinh viên. Mọi câu trả lời của bạn đều được giữ kín. Vui lòng chọn và ghi lại cảm xúc của mình.</p>
+<body class="p-4 md:p-8 min-h-screen">
+    <div class="max-w-4xl mx-auto">
+        <header class="text-center mb-8 p-6 bg-white shadow-lg rounded-xl">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-2">
+                <i class="fas fa-chart-line text-indigo-500 mr-3"></i>
+                Theo Dõi Cảm Xúc 5 Ngày (Trắc Nghiệm)
+            </h1>
+            <p class="text-gray-500 italic">Trả lời 6 câu hỏi để đánh giá toàn diện cảm xúc ngày hôm nay.</p>
+            <p id="user-info" class="text-xs text-gray-400 mt-2"></p>
+        </header>
 
-    <form id="evaluationForm">
-        </form>
-    
-    <button type="button" onclick="handleSubmit()">Gửi Phiếu Đánh Giá</button>
-</div>
+        <div id="loading" class="text-center p-10">
+            <i class="fas fa-spinner fa-spin text-indigo-500 text-3xl"></i>
+        </div>
 
-<script>
-    // 1. MẢNG CÂU HỎI (QUESTIONS ARRAY)
-    const questions = [
-        { id: 1, text: "Mức độ hài lòng chung của bạn về 5 ngày vừa qua là:", type: "scale", min: 1, max: 5, labels: ["Rất không hài lòng", "Rất hài lòng"] },
-        { id: 2, text: "Bạn cảm thấy mức năng lượng (tinh thần) của mình như thế nào?", type: "scale", min: 1, max: 5, labels: ["Rất thấp", "Rất cao"] },
-        { id: 3, text: "Bạn có cảm thấy có động lực, cảm hứng không?", type: "scale", min: 1, max: 5, labels: ["Hoàn toàn không", "Hoàn toàn có"] },
-        { id: 4, text: "Bạn cảm thấy căng thẳng/lo lắng ở mức độ nào?", type: "scale", min: 1, max: 5, labels: ["Không có", "Cực kỳ cao"] },
-        { id: 5, text: "Bạn cảm thấy kết nối tốt với bạn bè/đồng nghiệp không?", type: "scale", min: 1, max: 5, labels: ["Hoàn toàn không", "Rất kết nối"] },
-        { id: 6, text: "Bạn có cảm thấy cân bằng (không quá áp lực) không?", type: "scale", min: 1, max: 5, labels: ["Không cân bằng", "Rất cân bằng"] },
-        
-        // 4 CÂU HỎI GÓP Ý CHI TIẾT (Dạng Đoạn văn)
-        { id: 7, text: "Điều gì trong 5 ngày vừa qua khiến bạn cảm thấy tích cực/hứng khởi nhất?", type: "paragraph", required: true },
-        { id: 8, text: "Vấn đề (hoặc cảm xúc tiêu cực) lớn nhất mà bạn phải đối mặt là gì?", type: "paragraph", required: true },
-        { id: 9, text: "Bạn có đề xuất gì để cải thiện trải nghiệm trong các ngày tiếp theo?", type: "paragraph", required: false },
-        { id: 10, text: "Bạn có thông tin khác muốn chia sẻ không?", type: "paragraph", required: false }
+        <div id="tracker-container" class="bg-white p-6 md:p-8 shadow-xl rounded-xl hidden">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-6 border-b pb-3">Tiến Độ Theo Dõi</h2>
+            <div id="mood-days" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4"></div>
+
+            <div class="mt-10">
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4 border-b pb-3">Tổng quan 5 ngày</h2>
+                <div id="mood-chart" class="w-full h-40 bg-gray-50 rounded-lg p-3 flex items-end justify-around gap-2 shadow-inner">
+                    <p id="chart-placeholder" class="text-gray-400 text-center w-full">Chưa có dữ liệu.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="mood-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
+            <h3 id="modal-title" class="text-2xl font-bold text-gray-800 mb-4">Nhập Cảm Xúc</h3>
+
+            <form id="mood-form" class="space-y-4">
+                <div id="quiz-container"></div>
+
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Ghi chú thêm:</label>
+                    <textarea id="optional-note" class="w-full p-3 border rounded-lg"></textarea>
+                </div>
+
+                <p class="text-xl font-bold text-gray-700">Điểm: <span id="calculated-score-display" class="text-indigo-600">--</span></p>
+
+                <div class="flex justify-end gap-3 mt-4">
+                    <button type="button" onclick="closeModal()" class="px-4 py-2 bg-gray-300 rounded-lg">Hủy</button>
+                    <button type="submit" id="save-button" class="px-4 py-2 bg-indigo-600 text-white rounded-lg">Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // FIREBASE CONFIG (KHÔNG DÙNG BIẾN BÊN CANVAS NỮA)
+    const firebaseConfig = {
+        apiKey: "AIzaSyCj-_LubNDwDLweSpQrY534u0V8B3ZXJGU",
+        authDomain: "theodoicamxuc.firebaseapp.com",
+        projectId: "theodoicamxuc",
+        storageBucket: "theodoicamxuc.firebasestorage.app",
+        messagingSenderId: "608066933880",
+        appId: "1:608066933880:web:30382ba83db0c3a12ec98d",
+        measurementId: "G-4KSTPSLP76"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let userId = null;
+    let currentDayToEdit = null;
+    const totalDays = 5;
+    const moodData = {};
+
+    const QUIZ_QUESTIONS = [
+        { id: 'q1', label: 'Năng lượng hôm nay?', options: [10, 7, 4, 1] },
+        { id: 'q2', label: 'Cảm xúc chung?', options: [10, 7, 4, 1] },
+        { id: 'q3', label: 'Tập trung?', options: [10, 7, 4, 1] },
+        { id: 'q4', label: 'Xã hội?', options: [10, 7, 4, 1] },
+        { id: 'q5', label: 'Giấc ngủ?', options: [10, 7, 4, 1] },
+        { id: 'q6', label: 'Căng thẳng?', options: [10, 7, 4, 1] }
     ];
 
-    const form = document.getElementById('evaluationForm');
+    function getCollectionPath(uid) {
+        return `users/${uid}/mood`;
+    }
 
-    // 2. HÀM TẠO FORM TỰ ĐỘNG
-    function generateForm() {
-        questions.forEach(q => {
-            const block = document.createElement('div');
-            block.className = 'question-block';
+    function calculateFinalScore(sum) {
+        return Math.round(sum / 6);
+    }
 
-            const label = document.createElement('label');
-            label.innerHTML = `Câu ${q.id}: ${q.text}${q.required ? ' *' : ''}`;
-            block.appendChild(label);
+    // AUTH
+    onAuthStateChanged(auth, async u => {
+        if (!u) await signInAnonymously(auth);
+        else {
+            userId = u.uid;
+            document.getElementById("user-info").innerText = `User ID: ${userId}`;
+            loadData();
+        }
+    });
 
-            if (q.type === 'scale') {
-                const input = document.createElement('input');
-                input.type = 'range';
-                input.id = `q${q.id}`;
-                input.name = `q${q.id}`;
-                input.min = q.min;
-                input.max = q.max;
-                input.value = Math.ceil((q.min + q.max) / 2); // Giá trị mặc định ở giữa
-                
-                const scaleDiv = document.createElement('div');
-                scaleDiv.className = 'scale-option';
-                scaleDiv.innerHTML = `
-                    <span>${q.labels[0]}</span>
-                    <span>${q.labels[1]}</span>
-                `;
-                
-                block.appendChild(input);
-                block.appendChild(scaleDiv);
-
-            } else if (q.type === 'paragraph') {
-                const textarea = document.createElement('textarea');
-                textarea.id = `q${q.id}`;
-                textarea.name = `q${q.id}`;
-                if (q.required) {
-                    textarea.required = true;
-                }
-                block.appendChild(textarea);
-            }
-
-            form.appendChild(block);
+    // Load dữ liệu
+    function loadData() {
+        const ref = collection(db, getCollectionPath(userId));
+        onSnapshot(ref, (snap) => {
+            snap.forEach(doc => moodData[doc.data().day] = doc.data());
+            renderUI();
         });
     }
 
-    // 3. HÀM XỬ LÝ KHI GỬI (SUBMISSION HANDLER)
-    function handleSubmit() {
-        if (!form.checkValidity()) {
-            alert("Vui lòng trả lời các câu hỏi bắt buộc (*).");
-            return;
+    // UI
+    function renderUI() {
+        const container = document.getElementById("tracker-container");
+        const days = document.getElementById("mood-days");
+        const loading = document.getElementById("loading");
+        const chart = document.getElementById("mood-chart");
+
+        loading.classList.add("hidden");
+        container.classList.remove("hidden");
+        days.innerHTML = "";
+        chart.innerHTML = "";
+
+        let hasData = false;
+
+        for (let day = 1; day <= totalDays; day++) {
+            const data = moodData[day];
+            const score = data?.score ?? "--";
+
+            days.insertAdjacentHTML("beforeend", `
+                <button onclick="openModal(${day})"
+                    class="p-4 rounded-lg bg-indigo-500 text-white shadow-md">
+                    <p class="text-xs font-bold">Ngày ${day}</p>
+                    <p class="text-3xl font-bold">${score}</p>
+                </button>
+            `);
+
+            if (data) {
+                hasData = true;
+                const h = (data.score / 10) * 100;
+                chart.insertAdjacentHTML("beforeend", `
+                    <div class="flex flex-col items-center">
+                        <div class="w-8 bg-indigo-400" style="height:${h}%"></div>
+                        <span class="text-xs">N${day}</span>
+                    </div>
+                `);
+            }
         }
 
-        const formData = new FormData(form);
-        const results = {};
-        
-        // Thu thập dữ liệu
-        for (const [key, value] of formData.entries()) {
-            results[key] = value;
-        }
-
-        // Hiện kết quả (bạn có thể thay thế bằng logic gửi dữ liệu đến server)
-        console.log("Dữ liệu thu thập được:", results);
-        alert("Cảm ơn bạn đã hoàn thành phiếu đánh giá! Dữ liệu đã được ghi nhận.");
-        
-        // Tùy chọn: Reset form sau khi gửi
-        form.reset();
+        if (!hasData)
+            chart.innerHTML = `<p class="text-gray-400 w-full text-center">Chưa có dữ liệu.</p>`;
     }
 
-    // Khởi tạo form khi trang tải xong
-    generateForm();
+    // Modal
+    window.openModal = function(day) {
+        currentDayToEdit = day;
+        document.getElementById('modal-title').innerText = `Nhập Cảm Xúc Ngày ${day}`;
+        document.getElementById('mood-modal').classList.remove('hidden');
+        renderQuizForm();
+    }
+
+    window.closeModal = function() {
+        document.getElementById('mood-modal').classList.add('hidden');
+    }
+
+    function renderQuizForm() {
+        const container = document.getElementById('quiz-container');
+        container.innerHTML = "";
+
+        QUIZ_QUESTIONS.forEach(q => {
+            let html = `
+                <div>
+                    <p class="font-semibold mb-1">${q.label}</p>
+                    <div class="flex gap-2">
+            `;
+            q.options.forEach(val => {
+                html += `
+                    <div class="quiz-option flex-1">
+                        <input type="radio" id="${q.id}-${val}" name="${q.id}" value="${val}">
+                        <label for="${q.id}-${val}">${val}</label>
+                    </div>
+                `;
+            });
+
+            html += "</div></div>";
+            container.insertAdjacentHTML("beforeend", html);
+        });
+    }
+
+    // SAVE
+    document.getElementById("mood-form").addEventListener("submit", async e => {
+        e.preventDefault();
+
+        let sum = 0;
+        const answers = {};
+
+        for (const q of QUIZ_QUESTIONS) {
+            const input = document.querySelector(`input[name="${q.id}"]:checked`);
+            if (!input) return alert("Bạn chưa trả lời đủ.");
+
+            const value = parseInt(input.value);
+            answers[q.id] = value;
+            sum += value;
+        }
+
+        const score = calculateFinalScore(sum);
+        const note = document.getElementById("optional-note").value;
+
+        await setDoc(doc(db, getCollectionPath(userId), `day_${currentDayToEdit}`), {
+            day: currentDayToEdit,
+            score,
+            answers,
+            note,
+            time: new Date().toISOString()
+        });
+
+        closeModal();
+    });
 
 </script>
+
 </body>
 </html>
