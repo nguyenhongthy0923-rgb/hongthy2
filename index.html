@@ -307,7 +307,46 @@
                 console.error("Lỗi lắng nghe dữ liệu:", error);
             });
         }
+// Đây là biến chứa tất cả câu hỏi của bạn.
+// Tên biến có thể là 'questions', 'surveyQuestions', hoặc tương tự.
 
+const questions = [
+    // 6 CÂU HỎI TRẮC NGHIỆM BAN ĐẦU (Đang bị ẩn hoặc bạn không thấy)
+    { id: 1, text: "Tôi cảm thấy mình có động lực.", type: "scale" }, 
+    { id: 2, text: "Tôi cảm thấy căng thẳng.", type: "scale" },
+    { id: 3, text: "Tôi cảm thấy vui vẻ.", type: "scale" },
+    { id: 4, text: "Tôi có cảm hứng để làm việc.", type: "scale" },
+    { id: 5, text: "Tôi cảm thấy kết nối với mọi người.", type: "scale" },
+    { id: 6, text: "Tôi cảm thấy cân bằng (không quá áp lực).", type: "scale" },
+
+    // 4 CÂU HỎI MỚI (Dạng Đoạn văn để góp ý chi tiết)
+    { 
+        id: 7, 
+        text: "Điều gì trong 5 ngày vừa qua khiến bạn cảm thấy tích cực/hứng khởi nhất?", 
+        type: "paragraph", // Sẽ tạo ra ô nhập liệu dài
+        isOptional: false 
+    },
+    { 
+        id: 8, 
+        text: "Vấn đề (hoặc cảm xúc tiêu cực) lớn nhất mà bạn phải đối mặt là gì?", 
+        type: "paragraph", 
+        isOptional: false 
+    },
+    { 
+        id: 9, 
+        text: "Bạn có đề xuất gì để cải thiện trải nghiệm trong các ngày tiếp theo?", 
+        type: "paragraph", 
+        isOptional: true 
+    },
+    { 
+        id: 10, 
+        text: "Bạn có thông tin khác muốn chia sẻ không?", 
+        type: "paragraph", 
+        isOptional: true 
+    }
+];
+
+// ... (Các đoạn code khác của bạn)
         // --- UI Rendering ---
         function renderTrackerUI() {
             moodDaysElement.innerHTML = '';
