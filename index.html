@@ -310,6 +310,318 @@
                 loadingElement.classList.add('hidden');
                 trackerContainer.classList.remove('hidden');
             }, (error) => {
+           <!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theo Dõi Cảm Xúc 5 Ngày</title>
+    <!-- Tải Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* Màu nền nhẹ */
+        }
+        .mood-score-10 { background-color: #10b981; } /* Emerald 500 */
+        .mood-score-8 { background-color: #3b82f6; }  /* Blue 500 */
+        .mood-score-6 { background-color: #f97316; }  /* Orange 500 */
+        .mood-score-4 { background-color: #f43f5e; }  /* Rose 500 */
+        .mood-score-2 { background-color: #94a3b8; }  /* Slate 400 */
+
+        /* Custom style for radio buttons to look like buttons */
+        .quiz-option input[type="radio"] {
+            display: none;
+        }
+        .quiz-option label {
+            display: block;
+            padding: 8px 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 14px;
+            transition: all 0.2s;
+            color: #4b5563;
+            background-color: #f9fafb;
+        }
+        .quiz-option input[type="radio"]:checked + label {
+            background-color: #e0e7ff; /* Indigo 100 */
+            border-color: #4f46e5; /* Indigo 600 */
+            color: #4f46e5;
+            font-weight: 600;
+            box-shadow: 0 1px 3px rgba(79, 70, 229, 0.2);
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 min-h-screen">
+
+    <div class="max-w-4xl mx-auto">
+        <header class="text-center mb-8 p-6 bg-white shadow-lg rounded-xl">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-2">
+                <i class="fas fa-chart-line text-indigo-500 mr-3"></i>
+                Theo Dõi Cảm Xúc 5 Ngày (Trắc Nghiệm)
+            </h1>
+            <p class="text-gray-500 italic">Trả lời 6 câu hỏi để đánh giá toàn diện cảm xúc ngày hôm nay. Điểm số (1-10) sẽ được tính tự động.</p>
+            <p id="user-info" class="text-xs text-gray-400 mt-2"></p>
+        </header>
+
+        <!-- Loading Indicator -->
+        <div id="loading" class="text-center p-10 hidden">
+            <i class="fas fa-spinner fa-spin text-indigo-500 text-3xl"></i>
+            <p class="mt-3 text-gray-600">Đang tải ứng dụng và dữ liệu...</p>
+        </div>
+
+        <!-- Mood Tracker Grid -->
+        <div id="tracker-container" class="bg-white p-6 md:p-8 shadow-xl rounded-xl hidden">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-6 border-b pb-3">Tiến Độ Theo Dõi</h2>
+            <div id="mood-days" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+                <!-- Days will be injected here -->
+            </div>
+
+            <!-- Visualization Section -->
+            <div class="mt-10">
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4 border-b pb-3">Tổng quan 5 ngày</h2>
+                <div id="mood-chart" class="w-full h-40 bg-gray-50 rounded-lg p-3 flex items-end justify-around gap-2 shadow-inner">
+                    <!-- Chart bars will be injected here -->
+                    <p id="chart-placeholder" class="text-gray-400 text-center w-full">Chưa có dữ liệu. Hãy nhập cảm xúc cho ít nhất một ngày!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Mood Entry -->
+    <div id="mood-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden z-50 flex items-center justify-center p-4">
+        <!-- Đã thêm max-h-[90vh] và flex flex-col để kiểm soát chiều cao và bật cuộn -->
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col p-6 transform transition-all scale-100">
+            <h3 id="modal-title" class="text-2xl font-bold text-gray-800 mb-4 flex-shrink-0">Nhập Cảm Xúc Ngày X</h3>
+            
+            <!-- Thêm flex-grow và min-h-0 cho form để nó tự điều chỉnh kích thước -->
+            <form id="mood-form" class="flex flex-col flex-grow min-h-0">
+                
+                <!-- Vùng cuộn: đã thêm overflow-y-auto và pr-2 -mr-2 để tạo thanh cuộn bên trong -->
+                <div class="flex-grow overflow-y-auto pr-2 -mr-2 mb-4">
+                    <div id="quiz-questions-container" class="space-y-4">
+                        <!-- Questions will be dynamically inserted here -->
+                    </div>
+
+                    <div class="mt-6">
+                        <label for="optional-note" class="block text-gray-700 font-medium mb-2">Ghi chú thêm (Không bắt buộc):</label>
+                        <textarea id="optional-note" name="optional-note" rows="2" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500" placeholder="Ghi lại sự kiện quan trọng hoặc nguyên nhân của cảm xúc."></textarea>
+                    </div>
+                </div>
+                <!-- Kết thúc vùng cuộn -->
+
+                <div class="flex justify-between items-center pt-4 border-t flex-shrink-0">
+                    <p class="text-xl font-bold text-gray-700">Điểm dự kiến: <span id="calculated-score-display" class="text-indigo-600">--</span></p>
+                    <div class="flex space-x-3">
+                        <button type="button" onclick="closeModal()" class="px-4 py-2 text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 transition">Hủy</button>
+                        <button type="submit" id="save-button" class="px-4 py-2 text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition font-semibold disabled:opacity-50" disabled>Lưu Lại</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Bật logging để gỡ lỗi
+        setLogLevel('Debug');
+
+        // Định nghĩa các biến toàn cục từ môi trường Canvas
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';const firebaseConfig = {
+    apiKey: "AIzaSyCj-_LubNDwDLweSpQrY534u0V8B3ZXJGU",
+    authDomain: "theodoicamxuc.firebaseapp.com",
+    projectId: "theodoicamxuc",
+    storageBucket: "theodoicamxuc.firebasestorage.app",
+    messagingSenderId: "608066933880",
+    appId: "1:608066933880:web:30382ba83db0c3a12ec98d",
+    measurementId: "G-4KSTPSLP76"
+};
+
+        let db, auth, userId = null;
+        let currentDayToEdit = null;
+        const totalDays = 5;
+        const moodData = {}; // Lưu trữ dữ liệu mood: { day: { score, answers, timestamp } }
+
+        // Cấu trúc trắc nghiệm và điểm số
+        const MAX_SCORE_PER_Q = 10;
+        const QUIZ_QUESTIONS = [
+            {
+                id: 'q1',
+                label: '1. Mức độ Năng lượng hôm nay?',
+                options: [
+                    { text: 'Rất Cao, sục sôi', value: 10 },
+                    { text: 'Ổn, đủ làm việc', value: 7 },
+                    { text: 'Hơi thấp, mệt mỏi', value: 4 },
+                    { text: 'Rất Thấp, kiệt sức', value: 1 }
+                ]
+            },
+            {
+                id: 'q2',
+                label: '2. Cảm xúc chung hôm nay?',
+                options: [
+                    { text: 'Rất tích cực, Hạnh phúc', value: 10 },
+                    { text: 'Bình thường, thoải mái', value: 7 },
+                    { text: 'Hơi tiêu cực, bực bội', value: 4 },
+                    { text: 'Rất tệ, buồn bã/lo lắng', value: 1 }
+                ]
+            },
+            {
+                id: 'q3',
+                label: '3. Mức độ Tập trung/Hiệu quả?',
+                options: [
+                    { text: 'Cực kỳ tập trung', value: 10 },
+                    { text: 'Khá tốt, hoàn thành việc', value: 7 },
+                    { text: 'Phân tâm, trễ deadline', value: 4 },
+                    { text: 'Hoàn toàn mất phương hướng', value: 1 }
+                ]
+            },
+            {
+                id: 'q4',
+                label: '4. Mối quan hệ/Tương tác xã hội hôm nay?',
+                options: [
+                    { text: 'Kết nối mạnh mẽ, vui vẻ', value: 10 },
+                    { text: 'Bình thường, không vấn đề', value: 7 },
+                    { text: 'Hơi cô lập, ít tương tác', value: 4 },
+                    { text: 'Xích mích, cảm thấy bị tách biệt', value: 1 }
+                ]
+            },
+            {
+                id: 'q5',
+                label: '5. Chất lượng giấc ngủ đêm qua?',
+                options: [
+                    { text: 'Ngủ sâu, dậy sảng khoái', value: 10 },
+                    { text: 'Ngủ đủ, hơi khó dậy', value: 7 },
+                    { text: 'Ngủ không đủ/chập chờn', value: 4 },
+                    { text: 'Gần như thức trắng', value: 1 }
+                ]
+            },
+            {
+                id: 'q6',
+                label: '6. Mức độ Căng thẳng/Áp lực?',
+                options: [
+                    { text: 'Hoàn toàn thư giãn', value: 10 },
+                    { text: 'Căng thẳng nhẹ, có thể xử lý', value: 7 },
+                    { text: 'Áp lực lớn, khó chịu', value: 4 },
+                    { text: 'Quá tải, bùng nổ', value: 1 }
+                ]
+            }
+        ];
+        const TOTAL_MAX_SCORE = QUIZ_QUESTIONS.length * MAX_SCORE_PER_Q;
+
+        // Các phần tử DOM
+        const loadingElement = document.getElementById('loading');
+        const trackerContainer = document.getElementById('tracker-container');
+        const userInfoElement = document.getElementById('user-info');
+        const moodDaysElement = document.getElementById('mood-days');
+        const moodChartElement = document.getElementById('mood-chart');
+        const modalElement = document.getElementById('mood-modal');
+        const moodForm = document.getElementById('mood-form');
+        const modalTitle = document.getElementById('modal-title');
+        const optionalNoteInput = document.getElementById('optional-note');
+        const quizContainer = document.getElementById('quiz-questions-container');
+        const calculatedScoreDisplay = document.getElementById('calculated-score-display');
+        const saveButton = document.getElementById('save-button');
+
+
+        // Hiển thị loading
+        loadingElement.classList.remove('hidden');
+
+        // --- Hàm Utility ---
+        function getCollectionPath(uid) {
+            // Lưu trữ dữ liệu riêng tư: /artifacts/{appId}/users/{userId}/{your_collection_name}
+            return artifacts/${appId}/users/${uid}/mood_tracker_5_day_quiz; // Tên collection mới
+        }
+
+        // Tính toán điểm 1-10 từ tổng điểm trắc nghiệm
+        function calculateFinalScore(totalQuizScore) {
+            // Chuẩn hóa điểm từ tổng điểm (min 6, max 60) về 1-10.
+            const minTotalScore = QUIZ_QUESTIONS.length; // 6
+            const maxTotalScore = TOTAL_MAX_SCORE; // 60
+            
+            // Chuẩn hóa điểm từ [minTotalScore, maxTotalScore] về [0, 1]
+            const normalizedScore = (totalQuizScore - minTotalScore) / (maxTotalScore - minTotalScore);
+            
+            // Công thức: (Điểm đã chuẩn hóa * 9) + 1 (Ánh xạ [0, 1] sang [1, 10])
+            let finalScore = normalizedScore * 9 + 1;
+            return Math.round(Math.min(Math.max(finalScore, 1), 10)); // Đảm bảo nằm trong khoảng 1-10
+        }
+
+        // --- Firebase Init & Auth ---
+        async function initializeFirebase() {
+            try {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                // Đợi xác thực hoàn tất
+                await new Promise(resolve => {
+                    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+                        if (user) {
+                            userId = user.uid;
+                            userInfoElement.innerText = ID Người dùng (Dùng để đồng bộ): ${userId};
+                        } else {
+                            await signInAnonymously(auth);
+                        }
+
+                        if (userId) {
+                            unsubscribe();
+                            resolve();
+                        } else if (initialAuthToken) {
+                            await signInWithCustomToken(auth, initialAuthToken);
+                        }
+                    });
+                });
+
+                // Bắt đầu lắng nghe dữ liệu
+                if (userId) {
+                    setupRealtimeListener(userId);
+                    // Lắng nghe sự kiện thay đổi radio button để tính điểm
+                    moodForm.addEventListener('change', updateCalculatedScore);
+                } else {
+                    console.error("Lỗi: Không thể lấy được User ID sau khi xác thực.");
+                    loadingElement.classList.add('hidden');
+                    trackerContainer.innerHTML = <p class="text-red-500 text-center">Lỗi xác thực. Vui lòng thử lại.</p>;
+                    trackerContainer.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error("Lỗi khởi tạo Firebase:", error);
+                loadingElement.classList.add('hidden');
+                trackerContainer.innerHTML = <p class="text-red-500 text-center">Lỗi kết nối CSDL: ${error.message}</p>;
+                trackerContainer.classList.remove('hidden');
+            }
+        }
+
+        // --- Firestore Realtime Listener ---
+        function setupRealtimeListener(uid) {
+            const moodCollectionRef = collection(db, getCollectionPath(uid));
+            
+            onSnapshot(moodCollectionRef, (snapshot) => {
+                snapshot.docChanges().forEach((change) => {
+                    const data = change.doc.data();
+                    const day = data.day;
+                    if (change.type === "added" || change.type === "modified") {
+                        moodData[day] = data;
+                    } else if (change.type === "removed") {
+                        delete moodData[day];
+                    }
+                });
+                
+                renderTrackerUI();
+                renderChart();
+                loadingElement.classList.add('hidden');
+                trackerContainer.classList.remove('hidden');
+            }, (error) => {
                 console.error("Lỗi lắng nghe dữ liệu:", error);
             });
         }
@@ -351,6 +663,217 @@ const questions = [
         isOptional: true 
     }
 ];
+
+// ... (Các đoạn code khác của bạn)
+        // --- UI Rendering ---
+        function renderTrackerUI() {
+            moodDaysElement.innerHTML = '';
+            for (let day = 1; day <= totalDays; day++) {
+                const data = moodData[day];
+                const score = data ? data.score : '...';
+                const statusClass = data ? getColorClass(data.score) : 'bg-gray-200 hover:bg-gray-300';
+                const icon = data ? getIcon(data.score) : 'fa-face-meh';
+
+                const dayHtml = `
+                    <button data-day="${day}" onclick="openModal(${day})"
+                        class="day-card p-4 rounded-lg shadow-md text-white transition transform hover:scale-[1.02] active:scale-100 ${statusClass}">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs font-semibold">NGÀY ${day}</span>
+                            <i class="fas ${icon} text-lg"></i>
+                        </div>
+                        <p class="text-3xl font-extrabold text-white">${score}</p>
+                        <p class="text-sm mt-1">${data ? 'Đã nhập' : 'Chưa nhập'}</p>
+                    </button>
+                `;
+                moodDaysElement.insertAdjacentHTML('beforeend', dayHtml);
+            }
+        }
+
+        function renderChart() {
+            moodChartElement.innerHTML = '';
+            let hasData = false;
+
+            for (let day = 1; day <= totalDays; day++) {
+                const data = moodData[day];
+                const score = data ? data.score : 0;
+                const heightPercentage = score > 0 ? (score / 10) * 100 : 0;
+                const colorClass = data ? getColorClass(score) : 'bg-gray-300';
+                
+                if (score > 0) hasData = true;
+
+                const barHtml = `
+                    <div class="flex flex-col items-center h-full justify-end">
+                        <div class="text-sm font-semibold text-gray-700">${score > 0 ? score : ''}</div>
+                        <div style="height: ${heightPercentage}%;" 
+                            class="w-8 rounded-t-lg transition-all duration-500 ${colorClass} shadow-md"
+                            title="Ngày ${day}: Điểm ${score}">
+                        </div>
+                        <span class="text-xs text-gray-500 mt-1">N${day}</span>
+                    </div>
+                `;
+                moodChartElement.insertAdjacentHTML('beforeend', barHtml);
+            }
+
+            if (!hasData) {
+                 moodChartElement.innerHTML = <p id="chart-placeholder" class="text-gray-400 text-center w-full">Chưa có dữ liệu. Hãy nhập cảm xúc cho ít nhất một ngày!</p>;
+            }
+        }
+
+        function getColorClass(score) {
+            if (score >= 9) return 'mood-score-10';
+            if (score >= 7) return 'mood-score-8';
+            if (score >= 5) return 'mood-score-6';
+            if (score >= 3) return 'mood-score-4';
+            return 'mood-score-2';
+        }
+
+        function getIcon(score) {
+            if (score >= 9) return 'fa-face-laugh-squint';
+            if (score >= 7) return 'fa-face-smile';
+            if (score >= 5) return 'fa-face-meh';
+            if (score >= 3) return 'fa-face-frown';
+            return 'fa-face-sad-tear';
+        }
+
+        // --- Modal & Form Logic ---
+
+        function updateCalculatedScore() {
+            let selectedCount = 0;
+            let totalQuizScore = 0;
+            
+            QUIZ_QUESTIONS.forEach(q => {
+                const checkedRadio = moodForm.querySelector(input[name="${q.id}"]:checked);
+                if (checkedRadio) {
+                    totalQuizScore += parseInt(checkedRadio.value, 10);
+                    selectedCount++;
+                }
+            });
+
+            if (selectedCount === QUIZ_QUESTIONS.length) {
+                const finalScore = calculateFinalScore(totalQuizScore);
+                calculatedScoreDisplay.innerText = finalScore;
+                saveButton.disabled = false;
+            } else {
+                calculatedScoreDisplay.innerText = '--';
+                saveButton.disabled = true;
+            }
+        }
+
+        function renderQuizQuestions(existingAnswers = {}) {
+            quizContainer.innerHTML = '';
+            
+            QUIZ_QUESTIONS.forEach(q => {
+                let optionsHtml = '';
+                q.options.forEach(option => {
+                    // FIX: So sánh giá trị số (từ Firestore) với giá trị chuỗi (từ HTML input)
+                    const isChecked = String(existingAnswers[q.id]) === String(option.value);
+                    optionsHtml += `
+                        <div class="quiz-option flex-1 min-w-0">
+                            <input type="radio" id="${q.id}-${option.value}" name="${q.id}" value="${option.value}" ${isChecked ? 'checked' : ''} required />
+                            <label for="${q.id}-${option.value}">${option.text}</label>
+                        </div>
+                    `;
+                });
+
+                const questionHtml = `
+                    <div class="question-block p-4 border rounded-lg bg-gray-50 shadow-sm">
+                        <label class="block text-gray-700 font-bold mb-2">${q.label}</label>
+                        <div class="flex flex-wrap gap-2 md:flex-nowrap">
+                            ${optionsHtml}
+                        </div>
+                    </div>
+                `;
+                quizContainer.insertAdjacentHTML('beforeend', questionHtml);
+            });
+        }
+
+        window.openModal = function(day) {
+            currentDayToEdit = day;
+            modalTitle.innerText = Nhập Cảm Xúc Ngày ${day};
+            
+            const existingData = moodData[day];
+            const existingAnswers = existingData && existingData.answers ? existingData.answers : {};
+            const existingNote = existingData && existingData.note ? existingData.note : '';
+
+            // 1. Render và khôi phục các câu trả lời trắc nghiệm
+            renderQuizQuestions(existingAnswers);
+            
+            // 2. Khôi phục ghi chú
+            optionalNoteInput.value = existingNote;
+
+            // 3. Cập nhật điểm và trạng thái nút lưu
+            updateCalculatedScore();
+
+            modalElement.classList.remove('hidden');
+        }
+
+        window.closeModal = function() {
+            modalElement.classList.add('hidden');
+            currentDayToEdit = null;
+        }
+
+        moodForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentDayToEdit || !userId) {
+                console.error("Lỗi: Không xác định được ngày hoặc người dùng.");
+                return;
+            }
+
+            let totalQuizScore = 0;
+            const answers = {};
+            let isComplete = true;
+
+            // Thu thập câu trả lời và tính tổng điểm
+            QUIZ_QUESTIONS.forEach(q => {
+                const checkedRadio = moodForm.querySelector(input[name="${q.id}"]:checked);
+                if (checkedRadio) {
+                    const value = parseInt(checkedRadio.value, 10);
+                    totalQuizScore += value;
+                    answers[q.id] = value;
+                } else {
+                    isComplete = false;
+                }
+            });
+
+            if (!isComplete) {
+                console.error('Vui lòng trả lời tất cả các câu hỏi trắc nghiệm.'); 
+                return;
+            }
+
+            const finalScore = calculateFinalScore(totalQuizScore);
+            const optionalNote = optionalNoteInput.value.trim();
+
+            const newMoodEntry = {
+                day: currentDayToEdit,
+                score: finalScore,
+                answers: answers, // Lưu trữ câu trả lời thô
+                note: optionalNote,
+                timestamp: new Date().toISOString()
+            };
+
+            const moodDocRef = doc(db, getCollectionPath(userId), day_${currentDayToEdit});
+
+            try {
+                await setDoc(moodDocRef, newMoodEntry, { merge: true });
+                closeModal();
+                console.log(Đã lưu cảm xúc cho Ngày ${currentDayToEdit}. Score: ${finalScore});
+            } catch (e) {
+                // Cải thiện thông báo lỗi cho người dùng
+                console.error("LỖI LƯU DỮ LIỆU FIRESTORE:", e.message);
+                if (e.message.includes("permission denied")) {
+                     console.error("Gợi ý Lỗi: Lỗi này thường do Quy tắc bảo mật Firestore (Security Rules) chưa cho phép người dùng hiện tại ghi dữ liệu. (Permission Denied).");
+                }
+                console.error("Chi tiết lỗi:", e);
+            }
+        });
+
+
+        // --- Khởi chạy ứng dụng ---
+        window.onload = initializeFirebase;
+    </script>
+
+</body>
+</html>
 
 // ... (Các đoạn code khác của bạn)
         // --- UI Rendering ---
