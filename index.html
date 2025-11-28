@@ -126,9 +126,15 @@
         setLogLevel('Debug');
 
         // Định nghĩa các biến toàn cục từ môi trường Canvas
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';const firebaseConfig = {
+    apiKey: "AIzaSyCj-_LubNDwDLweSpQrY534u0V8B3ZXJGU",
+    authDomain: "theodoicamxuc.firebaseapp.com",
+    projectId: "theodoicamxuc",
+    storageBucket: "theodoicamxuc.firebasestorage.app",
+    messagingSenderId: "608066933880",
+    appId: "1:608066933880:web:30382ba83db0c3a12ec98d",
+    measurementId: "G-4KSTPSLP76"
+};
 
         let db, auth, userId = null;
         let currentDayToEdit = null;
